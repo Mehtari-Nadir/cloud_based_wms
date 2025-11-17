@@ -44,7 +44,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <ConvexProvider>
           <ClerkProvider>
-            <Header />
+            {/* <Header /> */}
             {children}
             <TanStackDevtools
               config={{
