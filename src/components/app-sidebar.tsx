@@ -7,8 +7,8 @@ import {
   IconPackage,
   IconBell,
   IconReportAnalytics,
-  IconBuildingWarehouse
-
+  IconBuildingWarehouse,
+  IconForklift
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -33,33 +33,38 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/admin/",
       icon: IconLayoutDashboard,
     },
     {
-      title: "Inventory",
-      url: "#",
+      title: "Warehouses",
+      url: "/admin/warehouses",
       icon: IconPackage,
     },
     {
+      title: "Stores",
+      url: "/admin/stores",
+      icon: IconBuildingWarehouse,
+    },
+    {
+      title: "Inventory",
+      url: "/admin/inventory",
+      icon: IconForklift,
+    },
+    {
+      title: "Users",
+      url: "/admin/users",
+      icon: IconUsers,
+    },
+    {
       title: "Stock Alert",
-      url: "#",
+      url: "/admin/stock_alert",
       icon: IconBell,
     },
     {
       title: "Reports",
-      url: "#",
+      url: "/admin/reports",
       icon: IconReportAnalytics,
-    },
-    {
-      title: "Users",
-      url: "#",
-      icon: IconUsers,
-    },
-    {
-      title: "Stores",
-      url: "#",
-      icon: IconBuildingWarehouse,
     },
   ],
   // navClouds: [
@@ -113,7 +118,7 @@ const data = {
   navSecondary: [
     {
       title: "Settings",
-      url: "#",
+      url: "/admin/settings",
       icon: IconSettings,
     },
   ],
@@ -148,7 +153,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">Company Name</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
