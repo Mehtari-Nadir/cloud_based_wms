@@ -81,5 +81,11 @@ export default defineSchema({
   stores: defineTable(storeFields),
   products: defineTable(productFields),
   activityLogs: defineTable(activityLogFileds),
-  alerts: defineTable(alertFileds)
+  alerts: defineTable(alertFileds),
+
+  // I will remove this code
+  todos: defineTable({
+    text: v.string(),
+    completed: v.boolean(),
+  }),
 })
