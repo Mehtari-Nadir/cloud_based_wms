@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Link } from "@tanstack/react-router";
 
 type TColumn = {
+    warehouse_id: string,
     warehouse_name: string,
     total_stores: number,
     total_items: number,
-    created_at: string
+    created_at: number
 };
 
 export const columns: ColumnDef<TColumn>[] = [
@@ -55,7 +57,15 @@ export const columns: ColumnDef<TColumn>[] = [
             )
         },
         cell: ({ row }) => {
-            return <div className="ml-3">{row.getValue("warehouse_name")}</div>
+            return (
+                <Link
+                    className="ml-3 hover:underline"
+                    to={"/admin/warehouses/$warehouse"}
+                    params={{warehouse: row.getValue("warehouse_name")!}}
+                >
+                    {row.getValue("warehouse_name")}
+                </Link>
+            );
         }
     },
     {
@@ -106,7 +116,8 @@ export const columns: ColumnDef<TColumn>[] = [
             )
         },
         cell: ({ row }) => {
-            return <div className="ml-3">{row.getValue("created_at")}</div>
+            const date = new Date(row.getValue("created_at"))
+            return <div className="ml-3">{date.toLocaleDateString()}</div>
         }
     },
     {

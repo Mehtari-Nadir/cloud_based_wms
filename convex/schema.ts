@@ -76,10 +76,11 @@ export const alertFileds = {
 
 export default defineSchema({
   users: defineTable(userFields),
-  warehouses: defineTable(warehouseFields),
+  warehouses: defineTable(warehouseFields).index("by_warehouse_name", ["name"]),
   warehouseMembers: defineTable(warehouseMemberFields),
-  stores: defineTable(storeFields),
-  products: defineTable(productFields),
+  stores: defineTable(storeFields)
+    .index("by_warehouse_id", ["warehouseId"]),
+  products: defineTable(productFields).index("by_store", ["storeId"]),
   activityLogs: defineTable(activityLogFileds),
   alerts: defineTable(alertFileds),
 

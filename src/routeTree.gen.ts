@@ -14,10 +14,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as DemoConvexRouteImport } from './routes/demo/convex'
 import { Route as DemoClerkRouteImport } from './routes/demo/clerk'
-import { Route as AdminWarehousesRouteImport } from './routes/admin/warehouses'
+import { Route as AdminWarehousesIndexRouteImport } from './routes/admin/warehouses/index'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
+import { Route as AdminWarehousesWarehouseRouteImport } from './routes/admin/warehouses/$warehouse'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
@@ -48,9 +49,9 @@ const DemoClerkRoute = DemoClerkRouteImport.update({
   path: '/demo/clerk',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminWarehousesRoute = AdminWarehousesRouteImport.update({
-  id: '/warehouses',
-  path: '/warehouses',
+const AdminWarehousesIndexRoute = AdminWarehousesIndexRouteImport.update({
+  id: '/warehouses/',
+  path: '/warehouses/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
@@ -68,6 +69,12 @@ const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
   path: '/demo/api/names',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminWarehousesWarehouseRoute =
+  AdminWarehousesWarehouseRouteImport.update({
+    id: '/warehouses/$warehouse',
+    path: '/warehouses/$warehouse',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
   id: '/demo/start/ssr/',
   path: '/demo/start/ssr/',
@@ -92,13 +99,14 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
-  '/admin/warehouses': typeof AdminWarehousesRoute
   '/demo/clerk': typeof DemoClerkRoute
   '/demo/convex': typeof DemoConvexRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/warehouses/$warehouse': typeof AdminWarehousesWarehouseRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/admin/warehouses': typeof AdminWarehousesIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -106,13 +114,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin/warehouses': typeof AdminWarehousesRoute
   '/demo/clerk': typeof DemoClerkRoute
   '/demo/convex': typeof DemoConvexRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/warehouses/$warehouse': typeof AdminWarehousesWarehouseRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/admin/warehouses': typeof AdminWarehousesIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -122,13 +131,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
-  '/admin/warehouses': typeof AdminWarehousesRoute
   '/demo/clerk': typeof DemoClerkRoute
   '/demo/convex': typeof DemoConvexRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/warehouses/$warehouse': typeof AdminWarehousesWarehouseRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/admin/warehouses/': typeof AdminWarehousesIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -139,13 +149,14 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/admin/warehouses'
     | '/demo/clerk'
     | '/demo/convex'
     | '/admin/'
+    | '/admin/warehouses/$warehouse'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/admin/warehouses'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -153,13 +164,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin/warehouses'
     | '/demo/clerk'
     | '/demo/convex'
     | '/admin'
+    | '/admin/warehouses/$warehouse'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/admin/warehouses'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -168,13 +180,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
-    | '/admin/warehouses'
     | '/demo/clerk'
     | '/demo/convex'
     | '/admin/'
+    | '/admin/warehouses/$warehouse'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/admin/warehouses/'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -232,11 +245,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoClerkRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/warehouses': {
-      id: '/admin/warehouses'
+    '/admin/warehouses/': {
+      id: '/admin/warehouses/'
       path: '/warehouses'
       fullPath: '/admin/warehouses'
-      preLoaderRoute: typeof AdminWarehousesRouteImport
+      preLoaderRoute: typeof AdminWarehousesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/demo/start/server-funcs': {
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo/api/names'
       preLoaderRoute: typeof DemoApiNamesRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/warehouses/$warehouse': {
+      id: '/admin/warehouses/$warehouse'
+      path: '/warehouses/$warehouse'
+      fullPath: '/admin/warehouses/$warehouse'
+      preLoaderRoute: typeof AdminWarehousesWarehouseRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/demo/start/ssr/': {
       id: '/demo/start/ssr/'
@@ -292,13 +312,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteRouteChildren {
-  AdminWarehousesRoute: typeof AdminWarehousesRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminWarehousesWarehouseRoute: typeof AdminWarehousesWarehouseRoute
+  AdminWarehousesIndexRoute: typeof AdminWarehousesIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
-  AdminWarehousesRoute: AdminWarehousesRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminWarehousesWarehouseRoute: AdminWarehousesWarehouseRoute,
+  AdminWarehousesIndexRoute: AdminWarehousesIndexRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
