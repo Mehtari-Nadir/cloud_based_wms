@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
+import { warehouseFields } from "./schema";
 
 export const getWarehouseByName = query({
     args: {
@@ -47,4 +48,23 @@ export const getWarehouses = query({
       })
     );
   },
+});
+
+export const createWarehouse = mutation({
+  args: {
+    name: warehouseFields.name,
+    description: warehouseFields.description,
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    // await ctx.db.insert("warehouses", {
+    //   name: args.name,
+    //   description: args.description,
+    //   createdBy: args.createBy
+    // });
+
+    console.log("name: ", args.name);
+    console.log("description: ", args.description);
+    console.log("identity: ", identity);
+  }
 });

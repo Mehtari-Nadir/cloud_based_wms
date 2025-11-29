@@ -8,11 +8,54 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 
+// auth
+import { useUser, SignInButton } from '@clerk/clerk-react';
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 export const Route = createFileRoute('/admin')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+
+  const { isSignedIn, isLoaded } = useUser();
+
+  if (!isLoaded) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-muted/40">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Authentication Required</CardTitle>
+            <CardDescription>
+              Please sign in to access the admin dashboard.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <SignInButton mode="modal">
+              <Button>Sign In</Button>
+            </SignInButton>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider
       style={

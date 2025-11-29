@@ -7,6 +7,7 @@ import ConvexProvider from '../integrations/convex/provider'
 import ClerkProvider from '../integrations/clerk/provider'
 
 import appCss from '../styles.css?url'
+import Header from '@/components/Header'
 
 export const Route = createRootRoute({
   head: () => ({
