@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -25,6 +24,10 @@ import {
 import { Textarea } from "../ui/textarea";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
+import { useAuth } from "@clerk/clerk-react";
+import { useState } from "react";
+import { Spinner } from "../ui/spinner";
+import { toast } from "sonner";
 
 const formSchema = z.object({
     warehouse_name: z.string().min(2, {
@@ -37,7 +40,10 @@ const formSchema = z.object({
 
 export const CreateWarehouseDialog = () => {
 
+    const { userId } = useAuth();
     const createWarehouse = useMutation(api.warehouses.createWarehouse);
+    const [isLoading, setLoading] = useState<boolean>(false);
+    const [isOpen, setOpen] = useState<boolean>(false);
 
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
@@ -52,14 +58,19 @@ export const CreateWarehouseDialog = () => {
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
+        setLoading(true);
         await createWarehouse({
             name: values.warehouse_name,
-            description: values.warehouse_description
+            description: values.warehouse_description,
+            createdBy: userId!
         });
+        setOpen(false);
+        toast.success("Warehouse has been created.");
+
     }
 
     return (
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button className=" cursor-pointer">
                     <Plus className="mr-2 h-4 w-4" />
@@ -102,10 +113,16 @@ export const CreateWarehouseDialog = () => {
                             )}
                         />
                         <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                            </DialogClose>
-                            <Button type="submit">Create</Button>
+                            {
+                                isLoading
+                                    ? (
+                                        <Button size="sm" variant="outline" disabled>
+                                            <Spinner />
+                                            Creating
+                                        </Button>
+                                    )
+                                    : <Button type="submit">Create</Button>
+                            }
                         </DialogFooter>
                     </form>
                 </Form>

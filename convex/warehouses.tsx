@@ -3,17 +3,17 @@ import { mutation, query } from "./_generated/server";
 import { warehouseFields } from "./schema";
 
 export const getWarehouseByName = query({
-    args: {
-        warehouseName: v.string()
-    },
-    handler: async (ctx, args) => {
-        const warehouse = await ctx.db
-            .query("warehouses")
-            .withIndex("by_warehouse_name", (q) => q.eq("name", args.warehouseName))
-            .unique();
-        
-            return warehouse;
-    }
+  args: {
+    warehouseName: v.string()
+  },
+  handler: async (ctx, args) => {
+    const warehouse = await ctx.db
+      .query("warehouses")
+      .withIndex("by_warehouse_name", (q) => q.eq("name", args.warehouseName))
+      .unique();
+
+    return warehouse;
+  }
 });
 
 export const getWarehouses = query({
@@ -54,17 +54,24 @@ export const createWarehouse = mutation({
   args: {
     name: warehouseFields.name,
     description: warehouseFields.description,
+    createdBy: warehouseFields.createdBy
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    // await ctx.db.insert("warehouses", {
-    //   name: args.name,
-    //   description: args.description,
-    //   createdBy: args.createBy
-    // });
+    await ctx.db.insert("warehouses", {
+      name: args.name,
+      description: args.description,
+      createdBy: args.createdBy
+    });
+  }
+});
 
-    console.log("name: ", args.name);
-    console.log("description: ", args.description);
-    console.log("identity: ", identity);
+export const deleteWarehouse = mutation({
+  args: {
+    warehouseId: v.id("warehouses")
+  },
+  handler: async (ctx, args) => {
+
+    // TODO: I should add user permission here
+    await ctx.db.delete(args.warehouseId);
   }
 });

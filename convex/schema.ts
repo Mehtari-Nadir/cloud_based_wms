@@ -4,10 +4,11 @@ import { v } from 'convex/values'
 export const userFields = {
   name: v.string(),
   email: v.string(),
+  clerkId: v.string(),
 };
 
 export const warehouseFields = {
-  createdBy: v.id("users"),
+  createdBy: v.string(),
   name: v.string(),
   description: v.string(),
 };
@@ -75,7 +76,8 @@ export const alertFileds = {
 };
 
 export default defineSchema({
-  users: defineTable(userFields),
+  users: defineTable(userFields)
+    .index("by_clerk_id", ["clerkId"]),
   warehouses: defineTable(warehouseFields).index("by_warehouse_name", ["name"]),
   warehouseMembers: defineTable(warehouseMemberFields),
   stores: defineTable(storeFields)

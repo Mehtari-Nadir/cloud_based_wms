@@ -1,4 +1,4 @@
-import { columns } from '@/components/data-tables/warehouses/columns';
+import { getColumns } from '@/components/data-tables/warehouses/columns';
 import { WarehouseDataTable } from '@/components/data-tables/warehouses/data-table';
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from "convex/react";
@@ -11,6 +11,7 @@ export const Route = createFileRoute('/admin/warehouses/')({
 
 function RouteComponent() {
   const warehouses = useQuery(api.warehouses.getWarehouses);
+  const columns = getColumns();
 
   // loading ui
   if (warehouses === undefined) {
