@@ -11,7 +11,7 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 
-type TInventoryColumn = {
+export type TInventoryColumn = {
     product_id: string;
     product_name: string;
     sku: string;
@@ -24,7 +24,11 @@ type TInventoryColumn = {
     price: string;
 };
 
-export const getInventoryColumns = (): ColumnDef<TInventoryColumn>[] => {
+interface GetInventoryColumnsOptions {
+    onEdit?: (product: TInventoryColumn) => void;
+}
+
+export const getInventoryColumns = (options?: GetInventoryColumnsOptions): ColumnDef<TInventoryColumn>[] => {
     return [
         {
             accessorKey: "product_name",
@@ -108,8 +112,7 @@ export const getInventoryColumns = (): ColumnDef<TInventoryColumn>[] => {
                                 Copy SKU
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {/* TODO: Implement edit modal */}
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => options?.onEdit?.(product)}>
                                 <Pencil className="mr-2 h-4 w-4" />
                                 Edit item
                             </DropdownMenuItem>
