@@ -8,7 +8,7 @@ export const userFields = {
 };
 
 export const warehouseFields = {
-  createdBy: v.string(),
+  createdBy: v.id("users"),
   name: v.string(),
   description: v.string(),
 };
@@ -27,13 +27,35 @@ export const storeFields = {
   storeType: storeTypes,
 };
 
+// Role types for RBAC
+export const roleTypes = v.union(
+  v.literal("owner"),
+  v.literal("manager"),
+  v.literal("staff")
+);
+
 export const warehouseMemberFields = {
   warehouseId: v.id("warehouses"),
   userId: v.id("users"),
-  // need update
-  role: v.string(),
-  invitedBy: v.id("users")
-  // I need to add invited_at & accepted_at
+  role: roleTypes,
+  invitedBy: v.optional(v.id("users")),
+  joinedAt: v.number(),
+};
+
+// Invitation status
+export const invitationStatus = v.union(
+  v.literal("pending"),
+  v.literal("accepted"),
+  v.literal("declined")
+);
+
+export const invitationFields = {
+  warehouseId: v.id("warehouses"),
+  email: v.string(),
+  role: roleTypes,
+  invitedBy: v.id("users"),
+  status: invitationStatus,
+  invitedAt: v.number(),
 };
 
 export const productFields = {
@@ -77,9 +99,17 @@ export const alertFileds = {
 
 export default defineSchema({
   users: defineTable(userFields)
-    .index("by_clerk_id", ["clerkId"]),
+    .index("by_clerk_id", ["clerkId"])
+    .index("by_email", ["email"]),
   warehouses: defineTable(warehouseFields).index("by_warehouse_name", ["name"]),
-  warehouseMembers: defineTable(warehouseMemberFields),
+  warehouseMembers: defineTable(warehouseMemberFields)
+    .index("by_warehouse", ["warehouseId"])
+    .index("by_user", ["userId"])
+    .index("by_warehouse_and_user", ["warehouseId", "userId"]),
+  invitations: defineTable(invitationFields)
+    .index("by_email", ["email"])
+    .index("by_warehouse", ["warehouseId"])
+    .index("by_email_and_warehouse", ["email", "warehouseId"]),
   stores: defineTable(storeFields)
     .index("by_warehouse_id", ["warehouseId"]),
   products: defineTable(productFields).index("by_store", ["storeId"]),

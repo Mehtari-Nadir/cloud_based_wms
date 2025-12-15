@@ -9,6 +9,8 @@
  */
 
 import type * as http from "../http.js";
+import type * as invitations from "../invitations.js";
+import type * as lib_permissions from "../lib/permissions.js";
 import type * as products from "../products.js";
 import type * as stores from "../stores.js";
 import type * as todos from "../todos.js";
@@ -23,6 +25,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   http: typeof http;
+  invitations: typeof invitations;
+  "lib/permissions": typeof lib_permissions;
   products: typeof products;
   stores: typeof stores;
   todos: typeof todos;

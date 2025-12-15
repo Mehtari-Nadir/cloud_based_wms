@@ -4,13 +4,18 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from "convex/react";
 import { api } from 'convex/_generated/api';
 import { CreateWarehouseDialog } from '@/components/dialogs/create-warehouse-dialog';
+import { useAuth } from '@clerk/clerk-react';
 
 export const Route = createFileRoute('/admin/warehouses/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const warehouses = useQuery(api.warehouses.getWarehouses);
+  const { userId } = useAuth();
+  const warehouses = useQuery(
+    api.warehouses.getMyWarehouses,
+    userId ? { clerkId: userId } : "skip"
+  );
   const columns = getColumns();
 
   // loading ui
@@ -24,6 +29,7 @@ function RouteComponent() {
     total_stores: w.total_stores,
     total_items: w.total_items,
     created_at: w._creationTime,
+    role: w.role,
   }));
 
   return (

@@ -13,17 +13,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@tanstack/react-router";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
+import { useAuth } from "@clerk/clerk-react";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 type TColumn = {
     warehouse_id: string,
     warehouse_name: string,
     total_stores: number,
     total_items: number,
-    created_at: number
+    created_at: number,
+    role: "owner" | "manager" | "staff"
 };
 
 export const getColumns = (): ColumnDef<TColumn>[] => {
 
+    const { userId } = useAuth();
     const deleteWarehouse = useMutation(api.warehouses.deleteWarehouse);
 
     return (
@@ -128,9 +133,19 @@ export const getColumns = (): ColumnDef<TColumn>[] => {
                 }
             },
             {
+                accessorKey: "role",
+                header: "Role",
+                cell: ({ row }) => {
+                    const role = row.getValue("role") as string;
+                    const variant = role === "owner" ? "default" : role === "manager" ? "secondary" : "outline";
+                    return <Badge variant={variant} className="capitalize">{role}</Badge>
+                }
+            },
+            {
                 id: "action",
                 cell: ({ row }: { row: any }) => {
                     const warehouse = row.original
+                    const isOwner = warehouse.role === "owner"
                     return (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -147,19 +162,33 @@ export const getColumns = (): ColumnDef<TColumn>[] => {
                                     Copy warehouse ID
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>View warehouse</DropdownMenuItem>
-                                <DropdownMenuItem>View warehouse members</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    onClick={async () => {
-                                        await deleteWarehouse({
-                                            warehouseId: warehouse.warehouse_id
-                                        });
-                                    }}
-                                    variant="destructive"
-                                >
-                                    Delete Warehouse
+                                <DropdownMenuItem asChild>
+                                    <Link to="/admin/warehouses/$warehouse" params={{ warehouse: warehouse.warehouse_name }}>
+                                        View warehouse
+                                    </Link>
                                 </DropdownMenuItem>
+                                {isOwner && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={async () => {
+                                                if (!userId) return;
+                                                try {
+                                                    await deleteWarehouse({
+                                                        warehouseId: warehouse.warehouse_id,
+                                                        clerkId: userId,
+                                                    });
+                                                    toast.success("Warehouse deleted");
+                                                } catch (error) {
+                                                    toast.error("Failed to delete warehouse");
+                                                }
+                                            }}
+                                            variant="destructive"
+                                        >
+                                            Delete Warehouse
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     )

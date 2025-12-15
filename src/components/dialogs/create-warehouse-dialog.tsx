@@ -56,17 +56,22 @@ export const CreateWarehouseDialog = () => {
 
     // 2. Define a submit handler.
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
+        if (!userId) return;
         setLoading(true);
-        await createWarehouse({
-            name: values.warehouse_name,
-            description: values.warehouse_description,
-            createdBy: userId!
-        });
-        setOpen(false);
-        toast.success("Warehouse has been created.");
-
+        try {
+            await createWarehouse({
+                name: values.warehouse_name,
+                description: values.warehouse_description,
+                clerkId: userId
+            });
+            setOpen(false);
+            form.reset();
+            toast.success("Warehouse has been created.");
+        } catch (error) {
+            toast.error("Failed to create warehouse");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (

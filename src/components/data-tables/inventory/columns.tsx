@@ -1,4 +1,4 @@
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -11,92 +11,87 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 
-type TColumn = {
-    member_id: string;
-    user_id: string;
-    name: string;
-    email: string;
-    role: "owner" | "manager" | "staff";
-    joined_at: number;
+type TInventoryColumn = {
+    product_id: string;
+    product_name: string;
+    sku: string;
+    store_id: string;
+    store_name: string;
+    warehouse_id: string;
+    warehouse_name: string;
+    quantity: number;
+    unit: string;
+    price: string;
 };
 
-const roleVariants: Record<string, "default" | "secondary" | "outline"> = {
-    owner: "default",
-    manager: "secondary",
-    staff: "outline",
-};
-
-export const getUserColumns = (): ColumnDef<TColumn>[] => {
+export const getInventoryColumns = (): ColumnDef<TInventoryColumn>[] => {
     return [
         {
-            accessorKey: "name",
+            accessorKey: "product_name",
             header: ({ column }) => {
                 return (
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
-                        Name
+                        Item Name
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
             },
             cell: ({ row }) => {
-                return <div className="ml-3 font-medium">{row.getValue("name")}</div>;
+                return <div className="ml-3 font-medium">{row.getValue("product_name")}</div>;
             },
         },
         {
-            accessorKey: "email",
+            accessorKey: "sku",
+            header: "SKU",
+            cell: ({ row }) => {
+                return <code className="text-sm bg-muted px-2 py-1 rounded">{row.getValue("sku")}</code>;
+            },
+        },
+        {
+            accessorKey: "warehouse_name",
+            header: "Warehouse",
+            cell: ({ row }) => {
+                return <div>{row.getValue("warehouse_name")}</div>;
+            },
+        },
+        {
+            accessorKey: "store_name",
+            header: "Store",
+            cell: ({ row }) => {
+                return <div>{row.getValue("store_name")}</div>;
+            },
+        },
+        {
+            accessorKey: "quantity",
             header: ({ column }) => {
                 return (
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
-                        Email
+                        Quantity
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
             },
             cell: ({ row }) => {
-                return <div className="ml-3">{row.getValue("email")}</div>;
-            },
-        },
-        {
-            accessorKey: "role",
-            header: "Role",
-            cell: ({ row }) => {
-                const role = row.getValue("role") as string;
+                const quantity = row.getValue("quantity") as number;
+                const unit = row.original.unit;
+                const variant = quantity <= 10 ? "destructive" : quantity <= 50 ? "secondary" : "default";
                 return (
-                    <Badge variant={roleVariants[role] || "outline"} className="capitalize">
-                        {role}
+                    <Badge variant={variant} className="ml-3">
+                        {quantity} {unit}
                     </Badge>
                 );
             },
         },
         {
-            accessorKey: "joined_at",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Joined At
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
-            cell: ({ row }) => {
-                const timestamp = row.getValue("joined_at") as number;
-                const date = new Date(timestamp);
-                return <div className="ml-3">{date.toLocaleDateString()}</div>;
-            },
-        },
-        {
             id: "actions",
             cell: ({ row }) => {
-                const member = row.original;
+                const product = row.original;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -108,17 +103,15 @@ export const getUserColumns = (): ColumnDef<TColumn>[] => {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(member.email)}
+                                onClick={() => navigator.clipboard.writeText(product.sku)}
                             >
-                                Copy email
+                                Copy SKU
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {/* TODO: Implement role change and remove member */}
-                            <DropdownMenuItem disabled>
-                                Change role
-                            </DropdownMenuItem>
-                            <DropdownMenuItem disabled variant="destructive">
-                                Remove from warehouse
+                            {/* TODO: Implement edit modal */}
+                            <DropdownMenuItem>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit item
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

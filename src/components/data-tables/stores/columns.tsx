@@ -10,93 +10,94 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@tanstack/react-router";
 
-type TColumn = {
-    member_id: string;
-    user_id: string;
-    name: string;
-    email: string;
-    role: "owner" | "manager" | "staff";
-    joined_at: number;
+type TStoreColumn = {
+    store_id: string;
+    store_name: string;
+    store_type: "plumbing" | "construction" | "electric" | "chemical";
+    warehouse_id: string;
+    warehouse_name: string;
+    item_count: number;
+    created_at: number;
 };
 
-const roleVariants: Record<string, "default" | "secondary" | "outline"> = {
-    owner: "default",
-    manager: "secondary",
-    staff: "outline",
+const storeTypeColors: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+    plumbing: "default",
+    construction: "secondary",
+    electric: "outline",
+    chemical: "destructive",
 };
 
-export const getUserColumns = (): ColumnDef<TColumn>[] => {
+export const getStoreColumns = (): ColumnDef<TStoreColumn>[] => {
     return [
         {
-            accessorKey: "name",
+            accessorKey: "store_name",
             header: ({ column }) => {
                 return (
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
-                        Name
+                        Store Name
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
             },
             cell: ({ row }) => {
-                return <div className="ml-3 font-medium">{row.getValue("name")}</div>;
+                return <div className="ml-3 font-medium">{row.getValue("store_name")}</div>;
             },
         },
         {
-            accessorKey: "email",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Email
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                );
-            },
+            accessorKey: "store_type",
+            header: "Store Type",
             cell: ({ row }) => {
-                return <div className="ml-3">{row.getValue("email")}</div>;
-            },
-        },
-        {
-            accessorKey: "role",
-            header: "Role",
-            cell: ({ row }) => {
-                const role = row.getValue("role") as string;
+                const type = row.getValue("store_type") as string;
                 return (
-                    <Badge variant={roleVariants[role] || "outline"} className="capitalize">
-                        {role}
+                    <Badge variant={storeTypeColors[type] || "default"} className="capitalize">
+                        {type}
                     </Badge>
                 );
             },
         },
         {
-            accessorKey: "joined_at",
+            accessorKey: "warehouse_name",
             header: ({ column }) => {
                 return (
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
-                        Joined At
+                        Warehouse
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 );
             },
             cell: ({ row }) => {
-                const timestamp = row.getValue("joined_at") as number;
-                const date = new Date(timestamp);
-                return <div className="ml-3">{date.toLocaleDateString()}</div>;
+                return <div className="ml-3">{row.getValue("warehouse_name")}</div>;
+            },
+        },
+        {
+            accessorKey: "item_count",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        Item Count
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                );
+            },
+            cell: ({ row }) => {
+                return <div className="ml-3">{row.getValue("item_count")}</div>;
             },
         },
         {
             id: "actions",
             cell: ({ row }) => {
-                const member = row.original;
+                const store = row.original;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -108,17 +109,18 @@ export const getUserColumns = (): ColumnDef<TColumn>[] => {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(member.email)}
+                                onClick={() => navigator.clipboard.writeText(store.store_id)}
                             >
-                                Copy email
+                                Copy store ID
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {/* TODO: Implement role change and remove member */}
-                            <DropdownMenuItem disabled>
-                                Change role
-                            </DropdownMenuItem>
-                            <DropdownMenuItem disabled variant="destructive">
-                                Remove from warehouse
+                            <DropdownMenuItem asChild>
+                                <Link 
+                                    to="/admin/inventory" 
+                                    search={{ storeId: store.store_id }}
+                                >
+                                    View inventory
+                                </Link>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
