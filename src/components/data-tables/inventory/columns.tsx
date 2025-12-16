@@ -1,4 +1,4 @@
-import { ArrowUpDown, MoreHorizontal, Pencil } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Pencil, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -22,6 +22,7 @@ export type TInventoryColumn = {
     quantity: number;
     unit: string;
     price: string;
+    image_url: string | null;
 };
 
 interface GetInventoryColumnsOptions {
@@ -30,6 +31,28 @@ interface GetInventoryColumnsOptions {
 
 export const getInventoryColumns = (options?: GetInventoryColumnsOptions): ColumnDef<TInventoryColumn>[] => {
     return [
+        {
+            accessorKey: "image_url",
+            header: "",
+            cell: ({ row }) => {
+                const imageUrl = row.getValue("image_url") as string | null;
+                return (
+                    <div className="w-10 h-10 flex items-center justify-center">
+                        {imageUrl ? (
+                            <img
+                                src={imageUrl}
+                                alt={row.getValue("product_name")}
+                                className="w-10 h-10 object-cover rounded-md border"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+                                <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                        )}
+                    </div>
+                );
+            },
+        },
         {
             accessorKey: "product_name",
             header: ({ column }) => {

@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as embedding from "../embedding.js";
+import type * as embeddingHelpers from "../embeddingHelpers.js";
 import type * as http from "../http.js";
 import type * as invitations from "../invitations.js";
 import type * as lib_permissions from "../lib/permissions.js";
@@ -24,6 +26,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  embedding: typeof embedding;
+  embeddingHelpers: typeof embeddingHelpers;
   http: typeof http;
   invitations: typeof invitations;
   "lib/permissions": typeof lib_permissions;

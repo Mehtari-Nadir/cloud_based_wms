@@ -66,6 +66,8 @@ export const productFields = {
   quantity: v.number(),
   unit: v.string(),
   price: v.string(),
+  imageId: v.optional(v.id("_storage")), // Optional product image
+  embedding: v.optional(v.array(v.float64())), // Vector embedding for semantic search
   alertThresholds: v.object({
     lowStock: v.number(),
     outOfStock: v.number(),
@@ -112,7 +114,13 @@ export default defineSchema({
     .index("by_email_and_warehouse", ["email", "warehouseId"]),
   stores: defineTable(storeFields)
     .index("by_warehouse_id", ["warehouseId"]),
-  products: defineTable(productFields).index("by_store", ["storeId"]),
+  products: defineTable(productFields)
+    .index("by_store", ["storeId"])
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 768, // Google text-embedding-004 dimensions
+      filterFields: ["storeId"],
+    }),
   activityLogs: defineTable(activityLogFileds),
   alerts: defineTable(alertFileds),
 

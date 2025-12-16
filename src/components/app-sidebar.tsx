@@ -8,7 +8,8 @@ import {
   IconBell,
   IconReportAnalytics,
   IconBuildingWarehouse,
-  IconForklift
+  IconForklift,
+  IconSearch
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -23,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Link } from "@tanstack/react-router"
 
 const data = {
   navMain: [
@@ -155,6 +157,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {/* Primary Search Button */}
+        <SidebarMenu className="px-2 pt-2">
+          <SidebarMenuItem>
+            <Link to="/admin/search">
+              <SidebarMenuButton
+                tooltip="Search Products"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+              >
+                <IconSearch />
+                <span>Search Products</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <NavMain items={data.navMain} />
         {/* <NavDocuments items={data.documents} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />

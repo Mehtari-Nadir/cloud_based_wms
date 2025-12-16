@@ -2,6 +2,28 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { productFields } from "./schema";
 import { getUserByClerkId, requirePermission, checkPermission } from "./lib/permissions";
+import { internal } from "./_generated/api";
+
+// Generate upload URL for product image
+export const generateUploadUrl = mutation({
+    args: {},
+    returns: v.string(),
+    handler: async (ctx) => {
+        return await ctx.storage.generateUploadUrl();
+    },
+});
+
+// Delete an uploaded image (used when user cancels creation)
+export const deleteImage = mutation({
+    args: {
+        imageId: v.id("_storage"),
+    },
+    returns: v.null(),
+    handler: async (ctx, args) => {
+        await ctx.storage.delete(args.imageId);
+        return null;
+    },
+});
 
 // Get ALL products for the current user (across all their warehouses/stores)
 export const getMyProducts = query({
@@ -22,6 +44,7 @@ export const getMyProducts = query({
             quantity: v.number(),
             unit: v.string(),
             price: v.string(),
+            imageUrl: v.union(v.string(), v.null()),
         })
     ),
     handler: async (ctx, args) => {
@@ -47,6 +70,7 @@ export const getMyProducts = query({
             quantity: number;
             unit: string;
             price: string;
+            imageUrl: string | null;
         }> = [];
 
         for (const membership of memberships) {
@@ -65,6 +89,10 @@ export const getMyProducts = query({
                     .collect();
 
                 for (const product of products) {
+                    const imageUrl = product.imageId 
+                        ? await ctx.storage.getUrl(product.imageId) 
+                        : null;
+                    
                     allProducts.push({
                         _id: product._id,
                         _creationTime: product._creationTime,
@@ -78,6 +106,7 @@ export const getMyProducts = query({
                         quantity: product.quantity,
                         unit: product.unit,
                         price: product.price,
+                        imageUrl,
                     });
                 }
             }
@@ -142,6 +171,7 @@ export const createProduct = mutation({
         quantity: productFields.quantity,
         unit: productFields.unit,
         price: productFields.price,
+        imageId: v.optional(v.id("_storage")),
         alertThresholds: productFields.alertThresholds,
         clerkId: v.string(),
     },
@@ -167,7 +197,15 @@ export const createProduct = mutation({
             quantity: args.quantity,
             unit: args.unit,
             price: args.price,
+            imageId: args.imageId,
             alertThresholds: args.alertThresholds,
+        });
+
+        // Schedule embedding generation for semantic search
+        await ctx.scheduler.runAfter(0, internal.embedding.generateProductEmbedding, {
+            productId,
+            name: args.name,
+            description: args.description,
         });
 
         return productId;
@@ -184,6 +222,7 @@ export const updateProduct = mutation({
         quantity: v.optional(v.number()),
         unit: v.optional(v.string()),
         price: v.optional(v.string()),
+        imageId: v.optional(v.union(v.id("_storage"), v.null())),
         alertThresholds: v.optional(productFields.alertThresholds),
         clerkId: v.string(),
     },
@@ -206,6 +245,11 @@ export const updateProduct = mutation({
 
         await requirePermission(ctx, user._id, store.warehouseId, "inventory:update");
 
+        // If replacing image, delete old one
+        if (args.imageId !== undefined && product.imageId && args.imageId !== product.imageId) {
+            await ctx.storage.delete(product.imageId);
+        }
+
         const updates: Partial<{
             name: string;
             sku: string;
@@ -213,6 +257,7 @@ export const updateProduct = mutation({
             quantity: number;
             unit: string;
             price: string;
+            imageId: any;
             alertThresholds: {
                 lowStock: number;
                 outOfStock: number;
@@ -228,9 +273,23 @@ export const updateProduct = mutation({
         if (args.quantity !== undefined) updates.quantity = args.quantity;
         if (args.unit !== undefined) updates.unit = args.unit;
         if (args.price !== undefined) updates.price = args.price;
+        if (args.imageId !== undefined) updates.imageId = args.imageId;
         if (args.alertThresholds !== undefined) updates.alertThresholds = args.alertThresholds;
 
         await ctx.db.patch(args.productId, updates);
+
+        // Regenerate embedding if name or description changed
+        if (args.name !== undefined || args.description !== undefined) {
+            const updatedProduct = await ctx.db.get(args.productId);
+            if (updatedProduct) {
+                await ctx.scheduler.runAfter(0, internal.embedding.generateProductEmbedding, {
+                    productId: args.productId,
+                    name: updatedProduct.name,
+                    description: updatedProduct.description,
+                });
+            }
+        }
+
         return null;
     }
 });

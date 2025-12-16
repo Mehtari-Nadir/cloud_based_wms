@@ -49,6 +49,7 @@ function RouteComponent() {
     quantity: p.quantity,
     unit: p.unit,
     price: p.price,
+    image_url: p.imageUrl,
   }));
 
   return (

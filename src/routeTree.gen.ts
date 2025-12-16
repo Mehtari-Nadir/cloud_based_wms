@@ -17,6 +17,7 @@ import { Route as DemoClerkRouteImport } from './routes/demo/clerk'
 import { Route as AdminWarehousesIndexRouteImport } from './routes/admin/warehouses/index'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminStoresIndexRouteImport } from './routes/admin/stores/index'
+import { Route as AdminSearchIndexRouteImport } from './routes/admin/search/index'
 import { Route as AdminInventoryIndexRouteImport } from './routes/admin/inventory/index'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
@@ -65,6 +66,11 @@ const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
 const AdminStoresIndexRoute = AdminStoresIndexRouteImport.update({
   id: '/stores/',
   path: '/stores/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSearchIndexRoute = AdminSearchIndexRouteImport.update({
+  id: '/search/',
+  path: '/search/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminInventoryIndexRoute = AdminInventoryIndexRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
+  '/admin/search': typeof AdminSearchIndexRoute
   '/admin/stores': typeof AdminStoresIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
   '/admin/warehouses': typeof AdminWarehousesIndexRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/admin/inventory': typeof AdminInventoryIndexRoute
+  '/admin/search': typeof AdminSearchIndexRoute
   '/admin/stores': typeof AdminStoresIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
   '/admin/warehouses': typeof AdminWarehousesIndexRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/admin/inventory/': typeof AdminInventoryIndexRoute
+  '/admin/search/': typeof AdminSearchIndexRoute
   '/admin/stores/': typeof AdminStoresIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/admin/warehouses/': typeof AdminWarehousesIndexRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
     | '/admin/inventory'
+    | '/admin/search'
     | '/admin/stores'
     | '/admin/users'
     | '/admin/warehouses'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
     | '/admin/inventory'
+    | '/admin/search'
     | '/admin/stores'
     | '/admin/users'
     | '/admin/warehouses'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
     | '/admin/inventory/'
+    | '/admin/search/'
     | '/admin/stores/'
     | '/admin/users/'
     | '/admin/warehouses/'
@@ -302,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStoresIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/search/': {
+      id: '/admin/search/'
+      path: '/search'
+      fullPath: '/admin/search'
+      preLoaderRoute: typeof AdminSearchIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/inventory/': {
       id: '/admin/inventory/'
       path: '/inventory'
@@ -372,6 +391,7 @@ interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminWarehousesWarehouseRoute: typeof AdminWarehousesWarehouseRoute
   AdminInventoryIndexRoute: typeof AdminInventoryIndexRoute
+  AdminSearchIndexRoute: typeof AdminSearchIndexRoute
   AdminStoresIndexRoute: typeof AdminStoresIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
   AdminWarehousesIndexRoute: typeof AdminWarehousesIndexRoute
@@ -381,6 +401,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminWarehousesWarehouseRoute: AdminWarehousesWarehouseRoute,
   AdminInventoryIndexRoute: AdminInventoryIndexRoute,
+  AdminSearchIndexRoute: AdminSearchIndexRoute,
   AdminStoresIndexRoute: AdminStoresIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
   AdminWarehousesIndexRoute: AdminWarehousesIndexRoute,

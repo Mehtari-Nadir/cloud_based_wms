@@ -29,10 +29,11 @@ import {
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import { useAuth } from "@clerk/clerk-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Spinner } from "../ui/spinner";
 import { toast } from "sonner";
 import { Id } from "convex/_generated/dataModel";
+import { X } from "lucide-react";
 
 const formSchema = z.object({
     name: z.string().min(2, {
@@ -58,13 +59,23 @@ interface EditProductDialogProps {
         sku: string;
         quantity: number;
         unit: string;
+        image_url: string | null;
     } | null;
 }
 
 export const EditProductDialog = ({ isOpen, onClose, product }: EditProductDialogProps) => {
     const { userId } = useAuth();
     const updateProduct = useMutation(api.products.updateProduct);
+    const generateUploadUrl = useMutation(api.products.generateUploadUrl);
+    const deleteImage = useMutation(api.products.deleteImage);
     const [isLoading, setLoading] = useState<boolean>(false);
+    
+    // Image state
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [newImageId, setNewImageId] = useState<Id<"_storage"> | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [removeCurrentImage, setRemoveCurrentImage] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema as any),
@@ -76,7 +87,7 @@ export const EditProductDialog = ({ isOpen, onClose, product }: EditProductDialo
         },
     });
 
-    // Reset form when product changes
+    // Reset form and image state when product changes
     useEffect(() => {
         if (product) {
             form.reset({
@@ -85,8 +96,77 @@ export const EditProductDialog = ({ isOpen, onClose, product }: EditProductDialo
                 quantity: product.quantity,
                 unit: product.unit,
             });
+            setImagePreview(product.image_url);
+            setNewImageId(null);
+            setRemoveCurrentImage(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     }, [product, form]);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+            toast.error("Please select a PNG or JPEG image");
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const reader = new FileReader();
+            reader.onload = (e) => setImagePreview(e.target?.result as string);
+            reader.readAsDataURL(file);
+
+            const uploadUrl = await generateUploadUrl();
+            const response = await fetch(uploadUrl, {
+                method: "POST",
+                headers: { "Content-Type": file.type },
+                body: file,
+            });
+            const { storageId } = await response.json();
+            setNewImageId(storageId);
+            setRemoveCurrentImage(false);
+        } catch (error) {
+            toast.error("Failed to upload image");
+            setImagePreview(product?.image_url ?? null);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleRemoveImage = async () => {
+        // If we uploaded a new image that wasn't saved yet, delete it
+        if (newImageId) {
+            try {
+                await deleteImage({ imageId: newImageId });
+            } catch (error) {
+                // Ignore
+            }
+            setNewImageId(null);
+        }
+        setImagePreview(null);
+        setRemoveCurrentImage(true);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const handleDialogClose = async () => {
+        // Cleanup new image if dialog is closed without saving
+        if (newImageId) {
+            try {
+                await deleteImage({ imageId: newImageId });
+            } catch (error) {
+                // Ignore
+            }
+        }
+        setNewImageId(null);
+        setRemoveCurrentImage(false);
+        onClose();
+    };
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         if (!userId || !product) return;
@@ -98,6 +178,8 @@ export const EditProductDialog = ({ isOpen, onClose, product }: EditProductDialo
                 sku: values.sku,
                 quantity: values.quantity,
                 unit: values.unit,
+                // Only include imageId if we're changing the image
+                ...(newImageId ? { imageId: newImageId } : removeCurrentImage ? { imageId: null } : {}),
                 clerkId: userId,
             });
             onClose();
@@ -110,7 +192,7 @@ export const EditProductDialog = ({ isOpen, onClose, product }: EditProductDialo
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && handleDialogClose()}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Edit inventory item</DialogTitle>
@@ -120,6 +202,41 @@ export const EditProductDialog = ({ isOpen, onClose, product }: EditProductDialo
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        {/* Image Upload */}
+                        <div className="space-y-2">
+                            <FormLabel>Product Image</FormLabel>
+                            {imagePreview ? (
+                                <div className="relative w-24 h-24">
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover rounded-md border"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute -top-2 -right-2 h-6 w-6"
+                                        onClick={handleRemoveImage}
+                                        disabled={isUploading}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/jpg"
+                                        onChange={handleImageUpload}
+                                        disabled={isUploading}
+                                        className="cursor-pointer"
+                                    />
+                                    {isUploading && <Spinner />}
+                                </div>
+                            )}
+                        </div>
                         <FormField
                             control={form.control}
                             name="name"
